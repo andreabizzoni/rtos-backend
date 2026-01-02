@@ -4,4 +4,8 @@ version = "0.1.0"
 description = "Guido AI"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "openai>=2.14.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+]
