@@ -12,26 +12,27 @@ class Agent:
             secret_key=settings.langfuse_secret_key,
             base_url=settings.langfuse_base_url,
         )
+        self.context = [{"role": "system", "content": "You are a helpful assistant"}]
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
     def answer(self, query: str) -> str:
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant"},
-            {"role": "user", "content": query},
-        ]
+        self.context.append({"role": "user", "content": query})
 
         response = self.client.responses.create(
             model=self.model,
-            input=messages,  # type: ignore
+            input=self.context,  # type: ignore
         )
+        output_text = response.output_text
+
+        self.context.append({"role": "assistant", "content": output_text})
 
         self.langfuse.update_current_generation(
-            input=messages,
-            output=response.output_text,
+            input=self.context,
+            output=output_text,
             usage_details={
                 "input": getattr(response.usage, "input_tokens", 0),
                 "output": getattr(response.usage, "output_tokens", 0),
             },
         )
 
-        return response.output_text
+        return output_text
