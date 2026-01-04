@@ -1,7 +1,6 @@
 from openai import OpenAI
 from .config.settings import settings
 from langfuse import observe, Langfuse
-import json
 
 from .calendar_client import CalendarClient
 from .models.calendar_models import CalendarEventToolCall
@@ -50,34 +49,37 @@ class Agent:
                 input=self.context,
                 tools=self.tools,
             )
-            print(response.model_dump_json(indent=2))
+
+            self.langfuse.update_current_generation(
+                input=self.context,
+                output=response.output,
+                usage_details={
+                    "input": getattr(response.usage, "input_tokens", 0),
+                    "output": getattr(response.usage, "output_tokens", 0),
+                },
+            )
 
             if response.output_text:
                 output_text = response.output_text
-
                 self.context.append({"role": "assistant", "content": output_text})
-
-                self.langfuse.update_current_generation(
-                    input=self.context,
-                    output=output_text,
-                    usage_details={
-                        "input": getattr(response.usage, "input_tokens", 0),
-                        "output": getattr(response.usage, "output_tokens", 0),
-                    },
-                )
                 return output_text
 
+            self.context += response.output
             for tool_call in response.output:
                 if tool_call.type != "function_call":
                     continue
 
                 name = tool_call.name
                 args = tool_call.arguments
-                print(name, args)
                 result = self.call_function(name, args)
-                print(result)
-                break
+                self.context.append(
+                    {
+                        "type": "function_call_output",
+                        "call_id": tool_call.call_id,
+                        "output": result,
+                    }
+                )
 
-            turns = 10
+            turns += 1
 
         return "Oops! Looks like I got stuck in an infinite loop, my head is starting to spin."
