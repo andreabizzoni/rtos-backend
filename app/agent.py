@@ -38,8 +38,10 @@ class Agent:
                 ).model_dump_json(indent=2)
             except Exception as e:
                 print(f"Tool call to {name} failed: {e}")
-                return f"Tool call to {name} failed. Either try a different tool or tell the user you are unable to complete their request right now."
-        return f"tool {name} does not exist. Either try a different tool or tell the user you are unable to complete their request right now."
+                return f"Tool call to {name} failed. Either try a different tool \
+                or tell the user you are unable to complete their request right now."
+        return f"tool {name} does not exist. Either try a different tool \
+        or tell the user you are unable to complete their request right now."
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
     def answer(self, query: str) -> str:
