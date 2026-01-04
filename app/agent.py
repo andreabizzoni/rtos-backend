@@ -1,7 +1,11 @@
 from openai import OpenAI
 from .config.settings import settings
 from langfuse import observe, Langfuse
-from tools.calendar_tools import create_event_tool
+import json
+
+from .calendar_client import CalendarClient
+from .models.calendar_models import CalendarEventToolCall
+from .tools.calendar_tools import create_event_tool
 
 
 class Agent:
@@ -13,29 +17,67 @@ class Agent:
             secret_key=settings.langfuse_secret_key,
             base_url=settings.langfuse_base_url,
         )
-        self.context = [{"role": "system", "content": "You are a helpful assistant"}]
+        self.context = [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant, ready to answer the user or perform actions via the tools you have available",
+            }
+        ]
+        self.calendar_client = CalendarClient()
         self.tools = [create_event_tool()]
+        self.max_turns = 5
+
+    def call_function(self, name: str, args: str) -> str:
+        if name == "create_calendar_event":
+            try:
+                validated_tool_call = CalendarEventToolCall.model_validate_json(args)
+                return self.calendar_client.create_event(
+                    validated_tool_call
+                ).model_dump_json(indent=2)
+            except Exception as e:
+                print(f"Tool call to {name} failed: {e}")
+                return f"Tool call to {name} failed. Either try a different tool or tell the user you are unable to complete their request right now."
+        return f"tool {name} does not exist. Either try a different tool or tell the user you are unable to complete their request right now."
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
     def answer(self, query: str) -> str:
         self.context.append({"role": "user", "content": query})
 
-        response = self.client.responses.create(
-            model=self.model,
-            input=self.context,  # type: ignore
-            tools=self.tools,
-        )
-        output_text = response.output_text
+        turns = 0
+        while turns < self.max_turns:
+            response = self.client.responses.create(
+                model=self.model,
+                input=self.context,
+                tools=self.tools,
+            )
+            print(response.model_dump_json(indent=2))
 
-        self.context.append({"role": "assistant", "content": output_text})
+            if response.output_text:
+                output_text = response.output_text
 
-        self.langfuse.update_current_generation(
-            input=self.context,
-            output=output_text,
-            usage_details={
-                "input": getattr(response.usage, "input_tokens", 0),
-                "output": getattr(response.usage, "output_tokens", 0),
-            },
-        )
+                self.context.append({"role": "assistant", "content": output_text})
 
-        return output_text
+                self.langfuse.update_current_generation(
+                    input=self.context,
+                    output=output_text,
+                    usage_details={
+                        "input": getattr(response.usage, "input_tokens", 0),
+                        "output": getattr(response.usage, "output_tokens", 0),
+                    },
+                )
+                return output_text
+
+            for tool_call in response.output:
+                if tool_call.type != "function_call":
+                    continue
+
+                name = tool_call.name
+                args = tool_call.arguments
+                print(name, args)
+                result = self.call_function(name, args)
+                print(result)
+                break
+
+            turns = 10
+
+        return "Oops! Looks like I got stuck in an infinite loop, my head is starting to spin."

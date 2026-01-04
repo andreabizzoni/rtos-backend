@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class DateTimeData(BaseModel):
@@ -11,14 +12,22 @@ class DateTimeData(BaseModel):
 class CalendarEvent(BaseModel):
     summary: str = Field(..., description="The title of the event.")
     start: DateTimeData = Field(..., description="The event start time.")
-    end_time: DateTimeData = Field(..., description="The event end time.")
-    description: str = Field(default="", description="A description of the event.")
-    location: str = Field(default="", description="The location of the event.")
-
-
-class CalendarEventRequest(CalendarEvent):
-    calendar_id: str = Field(..., description="The calendar id for the request.")
+    end: DateTimeData = Field(..., description="The event end time.")
+    description: str = Field(..., description="A description of the event.")
+    location: Optional[str] = Field(
+        default="", description="The location of the event."
+    )
 
 
 class CalendarEventResponse(CalendarEvent):
+    id: str = Field(..., description="Event identifier in the calendar.")
+    htmlLink: str = Field(..., description="Link to the event in Google Calendar.")
     status: str = Field(..., description="The response status.")
+
+
+class CalendarEventToolCall(BaseModel):
+    summary: str
+    start: str
+    end: str
+    description: str
+    location: Optional[str] = None

@@ -4,46 +4,71 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import os.path
 import pickle
-from models.calendar_models import CalendarEventRequest, CalendarEventResponse
+from .models.calendar_models import (
+    CalendarEventToolCall,
+    CalendarEvent,
+    CalendarEventResponse,
+    DateTimeData,
+)
+from .config.settings import settings
+import json
 
 
 class CalendarClient:
-    def __init__(self, credentials_file="credentials.json"):
-        self.credentials_file = credentials_file
+    def __init__(self):
         self.creds = None
         self.service = None
         self._authenticate()
 
     def _authenticate(self):
-        if os.path.exists("token.pickle"):
-            with open("token.pickle", "rb") as token:
+        module_dir = os.path.dirname(os.path.abspath(__file__))
+        token_file = os.path.join(module_dir, "token.pickle")
+
+        if os.path.exists(token_file):
+            with open(token_file, "rb") as token:
                 self.creds = pickle.load(token)
 
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.credentials_file, ["https://www.googleapis.com/auth/calendar"]
+                flow = InstalledAppFlow.from_client_config(
+                    settings.get_google_credentials_dict(),
+                    ["https://www.googleapis.com/auth/calendar"],
                 )
                 self.creds = flow.run_local_server(port=0)
 
-            with open("token.pickle", "wb") as token:
+            with open(token_file, "wb") as token:
                 pickle.dump(self.creds, token)
 
         self.service = build("calendar", "v3", credentials=self.creds)
 
-    def create_event(self, event: CalendarEventRequest) -> CalendarEventResponse:
+    def create_event(self, event: CalendarEventToolCall) -> CalendarEventResponse:
         if self.service is None:
-            raise Exception("Google Calendar service not initialized.")
-
-        response = (
-            self.service.events()
-            .insert(
-                calendarId=event.calendar_id,
-                body=event.model_dump(exclude={"calendar_id"}),
+            raise Exception(
+                "Failed to create calendar event: Google Calendar service not initialized."
             )
-            .execute()
-        )
+        try:
+            request_body = CalendarEvent(
+                summary=event.summary,
+                start=DateTimeData(
+                    dateTime=event.start,
+                ),
+                end=DateTimeData(
+                    dateTime=event.end,
+                ),
+                description=event.description,
+                location=event.location,
+            )
+            response = (
+                self.service.events()
+                .insert(
+                    calendarId=settings.email_address,
+                    body=request_body.model_dump(),
+                )
+                .execute()
+            )
+            return CalendarEventResponse.model_validate(obj=response, extra="ignore")
 
-        return CalendarEventResponse(**response)
+        except Exception as e:
+            raise Exception(f"Failed to create calendar event: {e}") from e
