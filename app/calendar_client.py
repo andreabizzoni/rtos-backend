@@ -1,7 +1,8 @@
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from datetime import datetime, timedelta
+
+# from datetime import datetime, timedelta
 import os.path
 import pickle
 from .models.calendar_models import (
@@ -11,7 +12,6 @@ from .models.calendar_models import (
     DateTimeData,
 )
 from .config.settings import settings
-import json
 
 
 class CalendarClient:
