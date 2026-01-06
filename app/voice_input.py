@@ -31,12 +31,13 @@ class VoiceInput:
 
     def _on_space_press(self, key) -> bool:
         try:
-            if key == keyboard.Key.space and not self.is_recording:
+            if key == keyboard.Key.space:
                 with self.recording_lock:
                     if not self.is_recording:
+                        # Start recording
                         self.is_recording = True
                         self.audio_frames = []
-                        print("\nRecording... (release space to stop)", end="", flush=True)
+                        print("\nRecording... (press SPACE again to stop)", end="", flush=True)
 
                         # Start audio stream
                         try:
@@ -53,16 +54,8 @@ class VoiceInput:
                             print(f"\nAudio device error: {e}")
                             self.is_recording = False
                             self.stream = None
-        except Exception as e:
-            print(f"\nError starting recording: {e}")
-            self.is_recording = False
-        return True
-
-    def _on_space_release(self, key) -> bool:
-        try:
-            if key == keyboard.Key.space and self.is_recording:
-                with self.recording_lock:
-                    if self.is_recording:
+                    else:
+                        # Stop recording
                         self.is_recording = False
                         print("\nProcessing...", end="", flush=True)
 
@@ -78,7 +71,7 @@ class VoiceInput:
                         else:
                             print("\nNo audio recorded. Try again.")
         except Exception as e:
-            print(f"\nError stopping recording: {e}")
+            print(f"\nError handling recording: {e}")
             self.is_recording = False
         return True
 
@@ -150,13 +143,7 @@ class VoiceInput:
                 except Exception as e:
                     print(f"\nError handling key press: {e}")
 
-            def on_release(key):
-                try:
-                    self._on_space_release(key)
-                except Exception as e:
-                    print(f"\nError handling key release: {e}")
-
-            self.listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+            self.listener = keyboard.Listener(on_press=on_press)
             self.listener.start()
         except Exception as e:
             print(f"\nError starting keyboard listener: {e}")
