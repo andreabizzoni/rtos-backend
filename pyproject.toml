@@ -11,8 +11,10 @@ dependencies = [
     "langfuse>=3.11.2",
     "numpy>=2.4.0",
     "openai>=2.14.0",
+    "playsound3>=3.3.0",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
+    "pydub>=0.25.1",
     "pynput>=1.8.1",
     "sounddevice>=0.5.3",
 ]

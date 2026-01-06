@@ -21,7 +21,7 @@ class Agent:
         self.context = [
             {
                 "role": "system",
-                "content": f"""You are a helpful AI assistant named Guido, 
+                "content": f"""You are an AI assistant named Guido, 
                 be ready to answer the user's questions or perform actions via the tools you have available. 
                 Today's date and current time are: {datetime.now()}.""",
             }
@@ -52,7 +52,15 @@ class Agent:
             return f"Tool call to {name} failed. Either try a different tool or tell the user you are unable to complete their request right now."
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
-    def answer(self, query: str) -> str:
+    def answer(self, query: str, chat: bool) -> str:
+        if not chat:
+            self.context.append(
+                {
+                    "role": "developer",
+                    "content": "You are responding in voice mode - your answers will be spoken aloud. Use natural, conversational language as if you're talking to a friend. Keep it short, informal, and easy to understand.",
+                }
+            )
+
         self.context.append({"role": "user", "content": query})
 
         turns = 0

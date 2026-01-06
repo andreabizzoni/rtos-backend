@@ -1,19 +1,23 @@
 from app.agent import Agent
+from app.tts import TextToSpeech
 from app.voice_input import VoiceInput
 
 
 def main() -> None:
     print("\nProgram starting")
     agent = Agent()
+    tts = TextToSpeech(agent.client)
     voice_input: VoiceInput | None = None
     voice_mode = False
 
     def on_transcription(text: str) -> None:
-        nonlocal agent
+        nonlocal agent, tts
         print(f"\nYou said: {text}")
         try:
-            agent_answer = agent.answer(text)
+            agent_answer = agent.answer(query=text, chat=False)
             print(f"\nGuido: {agent_answer}")
+            # Speak the response
+            tts.speak(agent_answer)
         except Exception as e:
             print(f"\nError processing query: {e}")
 
@@ -40,7 +44,7 @@ def main() -> None:
                         print(f"\nError starting voice mode: {e}")
                     continue
 
-                agent_answer = agent.answer(user_query)
+                agent_answer = agent.answer(query=user_query, chat=True)
                 print(f"\nGuido: {agent_answer}")
 
             else:
