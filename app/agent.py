@@ -5,7 +5,8 @@ from datetime import datetime
 
 from .calendar_client import CalendarClient
 from .models.calendar_models import CalendarEvent, CalendarTimeWindow
-from .tools.calendar_tools import create_event_tool, read_calendar_tool
+from .tools.calendar_tools import create_event_tool, read_calendar_tool, update_event_tool
+from .tools.web_search_tools import web_search_tool
 
 
 class Agent:
@@ -26,19 +27,23 @@ class Agent:
             }
         ]
         self.calendar_client = CalendarClient()
-        self.tools = [create_event_tool(), read_calendar_tool()]
+        self.tools = [create_event_tool(), read_calendar_tool(), update_event_tool(), web_search_tool()]
         self.max_turns = 5
 
     def call_function(self, name: str, args: str) -> str:
         try:
-            if name == "create_calendar_event":
-                validated_args = CalendarEvent.model_validate_json(args)
-                return self.calendar_client.create_event(validated_args).model_dump_json(indent=2)
-
             if name == "read_calendar":
                 validated_args = CalendarTimeWindow.model_validate_json(args)
                 events = self.calendar_client.read_calendar(validated_args)
                 return "\n".join([event.model_dump_json(indent=2) for event in events])
+
+            if name == "create_calendar_event":
+                validated_args = CalendarEvent.model_validate_json(args)
+                return self.calendar_client.create_event(validated_args).model_dump_json(indent=2)
+
+            if name == "update_calendar_event":
+                validated_args = CalendarEvent.model_validate_json(args)
+                return self.calendar_client.update_event(validated_args).model_dump_json(indent=2)
 
             return f"tool {name} does not exist."
 

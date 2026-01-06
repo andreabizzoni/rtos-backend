@@ -53,6 +53,24 @@ class CalendarClient:
         except Exception as e:
             raise Exception(f"Failed to create calendar event: {e}") from e
 
+    def update_event(self, event: CalendarEvent) -> CalendarEvent:
+        if self.service is None:
+            raise Exception("Failed to update calendar event: Google Calendar service not initialized.")
+        try:
+            response = (
+                self.service.events()
+                .update(
+                    calendarId=settings.email_address,
+                    eventId=event.id,
+                    body=event.model_dump(exclude={"status", "id"}),
+                )
+                .execute()
+            )
+            return CalendarEvent.model_validate(obj=response, extra="ignore")
+
+        except Exception as e:
+            raise Exception(f"Failed to update calendar event: {e}") from e
+
     def read_calendar(self, time_window: CalendarTimeWindow) -> list[CalendarEvent]:
         if self.service is None:
             raise Exception("Failed to read calendar: Google Calendar service not initialized.")

@@ -8,6 +8,7 @@ class DateTimeData(BaseModel):
 
 
 class CalendarEvent(BaseModel):
+    id: Optional[str] = Field(default=None, description="The unique identifier of the event.")
     status: Optional[str] = Field(default=None, description="The status of the event.")
     summary: str = Field(..., description="The title of the event.")
     start: DateTimeData = Field(..., description="The event start time.")
