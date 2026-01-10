@@ -1,4 +1,5 @@
 import uvicorn
+from starlette.middleware.cors import CORSMiddleware
 
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
@@ -38,7 +39,18 @@ def main() -> None:
         http_handler=request_handler,
     )
 
-    uvicorn.run(server.build(), host="0.0.0.0", port=9999)
+    app = server.build()
+
+    # Add CORS middleware to allow requests from the frontend
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],  # Frontend origin
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
+
+    uvicorn.run(app, host="0.0.0.0", port=9999)
 
 
 if __name__ == "__main__":
