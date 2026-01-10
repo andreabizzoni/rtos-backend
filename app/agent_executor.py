@@ -36,7 +36,7 @@ class Executor(AgentExecutor):
         try:
             async for event in self.agent.stream(query):
                 if isinstance(event, ToolCallEvent):
-                    logger.debug(f"Streaming tool call event: {event.name}")
+                    logger.info(f"Streaming tool call event: {event.name}")
                     await updater.update_status(
                         TaskState.working,
                         Message(
@@ -48,7 +48,7 @@ class Executor(AgentExecutor):
                         ),
                     )
                 elif isinstance(event, TextChunk):
-                    logger.debug(f"Streaming text chunk: {len(event.text)} chars")
+                    logger.info(f"Streaming text chunk: {len(event.text)} chars")
                     await updater.update_status(
                         TaskState.working,
                         Message(
