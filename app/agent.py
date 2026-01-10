@@ -1,18 +1,25 @@
-from openai import OpenAI
-from .config.settings import settings
-from langfuse import observe, Langfuse
+import logging
 from datetime import datetime
+from typing import AsyncIterator
+
+from langfuse import observe, Langfuse
+from openai import OpenAI, AsyncOpenAI
 
 from .calendar_client import CalendarClient
+from .config.settings import settings
 from .models.calendar_models import CalendarEvent, CalendarTimeWindow
+from .models.stream_models import TextChunk, ToolCallEvent, StreamEvent
 from .tools.calendar_tools import create_event_tool, read_calendar_tool, update_event_tool
 from .tools.web_search_tools import web_search_tool
+
+logger = logging.getLogger(__name__)
 
 
 class Agent:
     def __init__(self, model: str = "gpt-4.1"):
         self.model = model
         self.client = OpenAI(api_key=settings.openai_api_key)
+        self.async_client = AsyncOpenAI(api_key=settings.openai_api_key)
         self.langfuse = Langfuse(
             public_key=settings.langfuse_public_key,
             secret_key=settings.langfuse_secret_key,
@@ -45,10 +52,11 @@ class Agent:
                 validated_args = CalendarEvent.model_validate_json(args)
                 return self.calendar_client.update_event(validated_args).model_dump_json(indent=2)
 
+            logger.warning(f"Unknown tool requested: {name}")
             return f"tool {name} does not exist."
 
         except Exception as e:
-            print(f"Tool call to {name} failed: {e}")
+            logger.error(f"Tool call to {name} failed: {e}", exc_info=True)
             return f"Tool call to {name} failed. Either try a different tool or tell the user you are unable to complete their request right now."
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
@@ -96,3 +104,49 @@ class Agent:
             turns += 1
 
         return "Oops! Looks like I got stuck in an infinite loop, my head is starting to spin."
+
+    async def stream(self, query: str) -> AsyncIterator[StreamEvent]:
+        logger.info(f"chat_stream started with query: {query[:100]}...")
+        self.context.append({"role": "user", "content": query})
+        turns = 0
+
+        while turns < self.max_turns:
+            stream = await self.async_client.responses.create(
+                model=self.model,
+                input=self.context,  # type: ignore[arg-type]
+                tools=self.tools,  # type: ignore[arg-type]
+                stream=True,
+            )
+
+            response = None
+            async for event in stream:
+                if event.type == "response.output_text.delta":
+                    yield TextChunk(text=event.delta)
+                elif event.type == "response.completed":
+                    response = event.response
+
+            # If we got text output, we're done
+            if response and response.output_text:
+                logger.info(f"chat_stream completed with text response (turn {turns + 1})")
+                self.context.append({"role": "assistant", "content": response.output_text})
+                return
+
+            # Otherwise, handle tool calls and continue loop
+            if response:
+                self.context += response.output
+                for tool_call in response.output:
+                    if tool_call.type == "function_call":
+                        logger.info(f"Calling tool: {tool_call.name}")
+                        yield ToolCallEvent(name=tool_call.name)
+                        result = self.call_function(tool_call.name, tool_call.arguments)
+                        self.context.append(
+                            {
+                                "type": "function_call_output",
+                                "call_id": tool_call.call_id,
+                                "output": result,
+                            }
+                        )
+
+            turns += 1
+
+        logger.warning(f"chat_stream reached max turns ({self.max_turns})")
