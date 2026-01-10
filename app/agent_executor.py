@@ -5,7 +5,7 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import Role, TaskState, Message, Part, TextPart, DataPart
-from a2a.utils import new_agent_text_message, new_task
+from a2a.utils import new_task
 
 from .agent import Agent
 from .models.stream_models import TextChunk, ToolCallEvent
@@ -67,10 +67,12 @@ class Executor(AgentExecutor):
             logger.error(f"Task {task.id} failed: {e}", exc_info=True)
             await updater.update_status(
                 TaskState.failed,
-                new_agent_text_message(
-                    f"Error: {str(e)}",
-                    task.context_id,
-                    task.id,
+                Message(
+                    message_id=uuid4().hex,
+                    context_id=task.context_id,
+                    task_id=task.id,
+                    role=Role.agent,
+                    parts=[Part(root=TextPart(text=f"Error: {e}"))],
                 ),
                 final=True,
             )

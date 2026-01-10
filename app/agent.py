@@ -125,13 +125,11 @@ class Agent:
                 elif event.type == "response.completed":
                     response = event.response
 
-            # If we got text output, we're done
             if response and response.output_text:
                 logger.info(f"chat_stream completed with text response (turn {turns + 1})")
                 self.context.append({"role": "assistant", "content": response.output_text})
                 return
 
-            # Otherwise, handle tool calls and continue loop
             if response:
                 self.context += response.output
                 for tool_call in response.output:
@@ -150,3 +148,4 @@ class Agent:
             turns += 1
 
         logger.warning(f"chat_stream reached max turns ({self.max_turns})")
+        raise Exception("Agent reached maximum turns without completing")
