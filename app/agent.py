@@ -52,7 +52,7 @@ class Agent:
             return f"Tool call to {name} failed. Either try a different tool or tell the user you are unable to complete their request right now."
 
     @observe(as_type="generation", capture_input=False, capture_output=False)
-    def answer(self, query: str) -> str:
+    def chat(self, query: str) -> str:
         self.context.append({"role": "user", "content": query})
 
         turns = 0

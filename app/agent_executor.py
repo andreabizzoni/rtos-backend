@@ -10,7 +10,7 @@ class Executor(AgentExecutor):
         self.agent = Agent()
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
-        result = self.agent.answer(context.get_user_input())
+        result = self.agent.chat(context.get_user_input())
         await event_queue.enqueue_event(new_agent_text_message(result))
 
     async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
