@@ -1,9 +1,10 @@
 import logging
 
+from uuid import uuid4
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
-from a2a.types import TaskState
+from a2a.types import Role, TaskState, Message, Part, TextPart, DataPart
 from a2a.utils import new_agent_text_message, new_task
 
 from .agent import Agent
@@ -38,20 +39,24 @@ class Executor(AgentExecutor):
                     logger.debug(f"Streaming tool call event: {event.name}")
                     await updater.update_status(
                         TaskState.working,
-                        new_agent_text_message(
-                            f"Calling {event.name}...",
-                            task.context_id,
-                            task.id,
+                        Message(
+                            message_id=uuid4().hex,
+                            context_id=task.context_id,
+                            task_id=task.id,
+                            role=Role.agent,
+                            parts=[Part(root=DataPart(data={"type": "tool_call", "name": event.name}))],
                         ),
                     )
                 elif isinstance(event, TextChunk):
                     logger.debug(f"Streaming text chunk: {len(event.text)} chars")
                     await updater.update_status(
                         TaskState.working,
-                        new_agent_text_message(
-                            event.text,
-                            task.context_id,
-                            task.id,
+                        Message(
+                            message_id=uuid4().hex,
+                            context_id=task.context_id,
+                            task_id=task.id,
+                            role=Role.agent,
+                            parts=[Part(root=TextPart(text=event.text))],
                         ),
                     )
 
