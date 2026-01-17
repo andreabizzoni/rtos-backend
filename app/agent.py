@@ -14,6 +14,9 @@ from .tools.web_search_tools import web_search_tool
 
 logger = logging.getLogger(__name__)
 
+SPEECH = "speech"
+TEXT = "text"
+
 
 class Agent:
     def __init__(self, model: str = "gpt-4.1"):
@@ -105,9 +108,21 @@ class Agent:
 
         return "Oops! Looks like I got stuck in an infinite loop, my head is starting to spin."
 
-    async def stream(self, query: str) -> AsyncIterator[StreamEvent]:
-        logger.info(f"chat_stream started with query: {query[:100]}...")
+    async def stream(self, query: str, mode: str) -> AsyncIterator[StreamEvent]:
+        if mode == SPEECH:
+            self.context[0] = {
+                "role": "system",
+                "content": f"""You are an AI assistant named Rtos (pronounced art-ohs), 
+                be ready to answer the user's questions or perform actions via the tools you have available. 
+                Today's date and current time are: {datetime.now()}. You are responding via speech mode. This means that your
+                answers will be spoken out loud. Because of this, make sure that your answer emulates spoken language.
+                Avoid using written elements that you would not find in spoken language (like emojis or urls), and that all acroyms are written out 
+                in plain language instead.
+                """,
+            }
+
         self.context.append({"role": "user", "content": query})
+
         turns = 0
 
         while turns < self.max_turns:

@@ -19,6 +19,7 @@ class Executor(AgentExecutor):
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         query = context.get_user_input()
+        mode = context.metadata.get("mode", "text")
         task = context.current_task
 
         if not context.message:
@@ -34,7 +35,7 @@ class Executor(AgentExecutor):
         updater = TaskUpdater(event_queue, task.id, task.context_id)
 
         try:
-            async for event in self.agent.stream(query):
+            async for event in self.agent.stream(query, mode):
                 if isinstance(event, ToolCallEvent):
                     logger.info(f"Streaming tool call event: {event.name}")
                     await updater.update_status(
