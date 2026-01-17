@@ -1,7 +1,7 @@
 [project]
-name = "guido-ai"
+name = "rtos-ai"
 version = "0.1.0"
-description = "Guido AI"
+description = "RTOS AI"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

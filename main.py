@@ -21,15 +21,15 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     skill = AgentSkill(
         id="chat",
-        name="Guido Chat",
-        description="Chat with Guido, a helpful AI assistant",
+        name="Rtos Chat",
+        description="Chat with Rtos, a helpful AI assistant",
         tags=["chat"],
-        examples=["hey Guido!"],
+        examples=["hey Rtos!"],
     )
 
     public_agent_card = AgentCard(
-        name="Guido",
-        description="Guido, a helpful AI assistant",
+        name="Rtos",
+        description="Rtos, a helpful AI assistant",
         url="http://localhost:9999/",
         version="1.0.0",
         default_input_modes=["text"],
@@ -51,10 +51,9 @@ def main() -> None:
 
     app = server.build()
 
-    # Add CORS middleware to allow requests from the frontend
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],  # Frontend origin
+        allow_origins=["http://localhost:5173"], 
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"],

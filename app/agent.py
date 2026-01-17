@@ -28,7 +28,7 @@ class Agent:
         self.context = [
             {
                 "role": "system",
-                "content": f"""You are an AI assistant named Guido, 
+                "content": f"""You are an AI assistant named Rtos (pronounced art-ohs), 
                 be ready to answer the user's questions or perform actions via the tools you have available. 
                 Today's date and current time are: {datetime.now()}.""",
             }
