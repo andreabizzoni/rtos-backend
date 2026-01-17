@@ -415,57 +415,6 @@ wheels = [
 ]
 
 [[package]]
-name = "guido-ai"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "a2a-sdk", extra = ["http-server"] },
-    { name = "ag-ui-protocol" },
-    { name = "fastapi" },
-    { name = "google-api-python-client" },
-    { name = "google-auth-httplib2" },
-    { name = "google-auth-oauthlib" },
-    { name = "langfuse" },
-    { name = "numpy" },
-    { name = "openai" },
-    { name = "playsound3" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "pydub" },
-    { name = "pynput" },
-    { name = "sounddevice" },
-    { name = "uvicorn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "ipykernel" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "a2a-sdk", extras = ["http-server"], specifier = ">=0.3.22" },
-    { name = "ag-ui-protocol", specifier = ">=0.1.10" },
-    { name = "fastapi", specifier = ">=0.128.0" },
-    { name = "google-api-python-client", specifier = ">=2.187.0" },
-    { name = "google-auth-httplib2", specifier = ">=0.3.0" },
-    { name = "google-auth-oauthlib", specifier = ">=1.2.3" },
-    { name = "langfuse", specifier = ">=3.11.2" },
-    { name = "numpy", specifier = ">=2.4.0" },
-    { name = "openai", specifier = ">=2.14.0" },
-    { name = "playsound3", specifier = ">=3.3.0" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic-settings", specifier = ">=2.12.0" },
-    { name = "pydub", specifier = ">=0.25.1" },
-    { name = "pynput", specifier = ">=1.8.1" },
-    { name = "sounddevice", specifier = ">=0.5.3" },
-    { name = "uvicorn", specifier = ">=0.40.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "ipykernel", specifier = ">=7.1.0" }]
-
-[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1446,6 +1395,57 @@ sdist = { url = "https://files.pythonhosted.org/packages/da/8a/22b7beea3ee0d44b1
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl", hash = "sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762", size = 34696, upload-time = "2025-04-16T09:51:17.142Z" },
 ]
+
+[[package]]
+name = "rtos-ai"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "a2a-sdk", extra = ["http-server"] },
+    { name = "ag-ui-protocol" },
+    { name = "fastapi" },
+    { name = "google-api-python-client" },
+    { name = "google-auth-httplib2" },
+    { name = "google-auth-oauthlib" },
+    { name = "langfuse" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "playsound3" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pydub" },
+    { name = "pynput" },
+    { name = "sounddevice" },
+    { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ipykernel" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "a2a-sdk", extras = ["http-server"], specifier = ">=0.3.22" },
+    { name = "ag-ui-protocol", specifier = ">=0.1.10" },
+    { name = "fastapi", specifier = ">=0.128.0" },
+    { name = "google-api-python-client", specifier = ">=2.187.0" },
+    { name = "google-auth-httplib2", specifier = ">=0.3.0" },
+    { name = "google-auth-oauthlib", specifier = ">=1.2.3" },
+    { name = "langfuse", specifier = ">=3.11.2" },
+    { name = "numpy", specifier = ">=2.4.0" },
+    { name = "openai", specifier = ">=2.14.0" },
+    { name = "playsound3", specifier = ">=3.3.0" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "pydub", specifier = ">=0.25.1" },
+    { name = "pynput", specifier = ">=1.8.1" },
+    { name = "sounddevice", specifier = ">=0.5.3" },
+    { name = "uvicorn", specifier = ">=0.40.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ipykernel", specifier = ">=7.1.0" }]
 
 [[package]]
 name = "six"
