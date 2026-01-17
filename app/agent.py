@@ -109,7 +109,7 @@ class Agent:
         return "Oops! Looks like I got stuck in an infinite loop, my head is starting to spin."
 
     async def stream(self, query: str, mode: str) -> AsyncIterator[StreamEvent]:
-        logger.info(f"Answering in {mode} mode the query: {query[:20]}")
+        logger.info(f"Answering in {mode} mode the query: {query[:20]}...")
         if mode == SPEECH:
             self.context[0] = {
                 "role": "system",
