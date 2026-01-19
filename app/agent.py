@@ -137,15 +137,11 @@ class Agent:
             response = None
             async for event in stream:
                 if event.type == "response.output_text.delta":
-                    if mode == TEXT:
-                        yield TextChunk(text=event.delta)
+                    yield TextChunk(text=event.delta)
                 elif event.type == "response.completed":
                     response = event.response
 
             if response and response.output_text:
-                if mode == SPEECH:
-                    yield TextChunk(text=response.output_text)
-
                 logger.info(f"chat_stream completed with text response (turn {turns + 1})")
                 self.context.append({"role": "assistant", "content": response.output_text})
                 return
