@@ -10,4 +10,9 @@ class ToolCallEvent(BaseModel):
     name: str
 
 
-StreamEvent = Union[TextChunk, ToolCallEvent]
+class AudioChunk(BaseModel):
+    data: str  # base64-encoded audio bytes
+    mime_type: str = "audio/mpeg"
+
+
+StreamEvent = Union[TextChunk, ToolCallEvent, AudioChunk]
