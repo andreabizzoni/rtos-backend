@@ -32,7 +32,7 @@ class Agent:
         self.calendar_client = CalendarClient()
         self.tools = [create_event_tool(), read_calendar_tool(), update_event_tool(), web_search_tool()]
         self.max_turns = 5
-        self.elevenlabs_voice_id = "JBFqnCBsd6RMkjVDRZzb"
+        self.elevenlabs_voice_id = "vBKc2FfBKJfcZNyEt1n6"
         self.elevenlabs_model_id = "eleven_turbo_v2_5"
 
     def call_function(self, name: str, args: str) -> str:
